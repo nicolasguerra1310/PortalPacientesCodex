@@ -28,7 +28,7 @@ export default function Dashboard() {
 
     const fetchData = async () => {
       try {
-        const histRes = await fetch(`http://localhost:5075/api/study/history?dni=${parsedPatient.dni}`);
+        const histRes = await fetch(`/api/study/history?dni=${parsedPatient.dni}`);
         if (histRes.ok) {
           const histData = await histRes.json();
           if (histData.success) {
@@ -38,7 +38,7 @@ export default function Dashboard() {
           }
         }
 
-        const currRes = await fetch(`http://localhost:5075/api/study/current?dni=${parsedPatient.dni}&accessionNumber=${accessNumber}`);
+        const currRes = await fetch(`/api/study/current?dni=${parsedPatient.dni}&accessionNumber=${accessNumber}`);
         if (currRes.ok) {
           const currData = await currRes.json();
           if (currData.success) {
@@ -80,7 +80,7 @@ export default function Dashboard() {
 
   const getDownloadReportUrl = (accessionNo) => {
     const dni = patient?.dni || '';
-    return `http://localhost:5075/api/study/download-report?dni=${dni}&accessionNumber=${accessionNo}`;
+    return `/api/study/download-report?dni=${dni}&accessionNumber=${accessionNo}`;
   };
 
   if (loading) {
@@ -108,58 +108,58 @@ export default function Dashboard() {
   const studyUrlToUse = currentStudy?.studyUrl || currentStudyDetails?.url;
 
   return (
-    <div className="animate-fade-in dashboard-container" style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div className="animate-fade-in dashboard-container" style={{ width: '100%' }}>
+      <div className="dashboard-header-container">
         <div>
-          <h2 style={{ fontSize: '1.75rem', marginBottom: '0.25rem', color: 'var(--primary)' }}>Bienvenido, {displayPatientName}</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>DNI: {patient?.dni}</p>
+          <h2 className="dashboard-title">Bienvenido, {displayPatientName}</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: 0 }}>DNI: {patient?.dni}</p>
         </div>
-        <button onClick={handleLogout} className="btn-primary" style={{ backgroundColor: 'transparent', color: 'var(--error)', border: '1px solid var(--error)', padding: '0.5rem 1rem' }}>
-          <LogOut size={18} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} /> Cerrar Sesión
+        <button onClick={handleLogout} className="btn-primary logout-btn">
+          <LogOut size={18} /> <span className="logout-text">Cerrar Sesión</span>
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.25rem' }}>
         <button 
           onClick={() => setActiveTab('current')}
-          style={{ background: 'none', border: 'none', fontSize: '1.1rem', fontWeight: activeTab === 'current' ? '600' : '400', color: activeTab === 'current' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem 1rem', borderBottom: activeTab === 'current' ? '2px solid var(--primary)' : 'none' }}
+          style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: activeTab === 'current' ? '600' : '400', color: activeTab === 'current' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem 1rem', borderBottom: activeTab === 'current' ? '2px solid var(--primary)' : 'none' }}
         >
-          <ImageIcon size={18} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }}/> Estudio Actual
+          <ImageIcon size={18} style={{ marginRight: '0.25rem', verticalAlign: 'middle' }}/> Estudio Actual
         </button>
         <button 
           onClick={() => setActiveTab('history')}
-          style={{ background: 'none', border: 'none', fontSize: '1.1rem', fontWeight: activeTab === 'history' ? '600' : '400', color: activeTab === 'history' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem 1rem', borderBottom: activeTab === 'history' ? '2px solid var(--primary)' : 'none' }}
+          style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: activeTab === 'history' ? '600' : '400', color: activeTab === 'history' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem 1rem', borderBottom: activeTab === 'history' ? '2px solid var(--primary)' : 'none' }}
         >
-          <History size={18} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }}/> Mi Historial
+          <History size={18} style={{ marginRight: '0.25rem', verticalAlign: 'middle' }}/> Mi Historial
         </button>
       </div>
 
       {activeTab === 'current' && (
-        <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
+        <div className="glass-panel glass-panel-responsive">
+          <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '1.15rem' }}>
             Estudio Actual Consultado
           </h3>
           
-          <div style={{ padding: '1.5rem', backgroundColor: '#f8fafc', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '2rem' }}>
-            <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+          <div style={{ padding: '1rem', backgroundColor: '#f8fafc', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem' }}>
+            <p style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>
               <strong>Estudio:</strong> {currentStudyDetails?.study_desc || 'Estudio de Diagnóstico por Imágenes'}
             </p>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
               <strong>Efector / Hospital:</strong> {displayHospital}
             </p>
-            <p style={{ color: 'var(--text-muted)' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
               <strong>Número de Acceso:</strong> {currentAccessNo}
             </p>
           </div>
 
-          <div className="current-study-buttons" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div className="current-study-buttons" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             {studyUrlToUse ? (
-              <a href={studyUrlToUse} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: '1', minWidth: '200px', fontSize: '1.1rem', padding: '1rem' }}>
-                <ImageIcon size={24} />
+              <a href={studyUrlToUse} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: '1', minWidth: '200px', fontSize: '1rem', padding: '0.75rem' }}>
+                <ImageIcon size={20} />
                 VER IMAGEN
               </a>
             ) : (
-               <div style={{ flex: '1', padding: '1rem', textAlign: 'center', background: '#fef2f2', color: 'var(--error)', borderRadius: 'var(--radius-md)', border: '1px solid #fecaca' }}>
+               <div style={{ flex: '1', padding: '0.75rem', textAlign: 'center', background: '#fef2f2', color: 'var(--error)', borderRadius: 'var(--radius-md)', border: '1px solid #fecaca', fontSize: '0.9rem' }}>
                  No hay imágenes disponibles para este estudio.
                </div>
             )}
@@ -169,9 +169,9 @@ export default function Dashboard() {
                  <button 
                    onClick={() => setReportModalData({ url: currentStudy.informeUrl, accessionNo: currentAccessNo, desc: currentStudyDetails?.study_desc })} 
                    className="btn-primary" 
-                   style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: '1', fontSize: '1.1rem', padding: '1rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'white' }}
+                   style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: '1', fontSize: '1rem', padding: '0.75rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'white' }}
                  >
-                   <FileText size={24} />
+                   <FileText size={20} />
                    VER INFORME
                  </button>
                  <a 
@@ -179,14 +179,14 @@ export default function Dashboard() {
                    download={`Informe_${currentAccessNo}.pdf`}
                    title="Descarga directa del informe en PDF"
                    className="btn-primary" 
-                   style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '1rem 1.25rem', backgroundColor: '#1e293b', color: 'white', textDecoration: 'none' }}
+                   style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem 1rem', backgroundColor: '#1e293b', color: 'white', textDecoration: 'none' }}
                    onClick={() => toast.success('Descargando informe...')}
                  >
-                   <Download size={24} />
+                   <Download size={20} />
                  </a>
                </div>
             ) : (
-               <div style={{ flex: '1', padding: '1rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+               <div style={{ flex: '1', padding: '0.75rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                  El informe médico aún no está disponible.
                </div>
             )}
@@ -195,68 +195,62 @@ export default function Dashboard() {
       )}
 
       {activeTab === 'history' && (
-        <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3 style={{ marginBottom: '1.5rem' }}>Historial de Estudios</h3>
+        <div className="glass-panel glass-panel-responsive">
+          <h3 style={{ marginBottom: '1rem', color: 'var(--text-main)', fontSize: '1.15rem' }}>Historial de Estudios</h3>
           {history && history.length > 0 ? (
             <>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {history.slice((currentPage - 1) * 10, currentPage * 10).map((study, idx) => (
-                  <div key={idx} className="history-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
-                    <div>
-                      <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--primary)', minHeight: '1.5rem' }}>
+              <div className="history-grid">
+                {history.slice((currentPage - 1) * 6, currentPage * 6).map((study, idx) => (
+                  <div key={idx} className="history-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem', color: 'var(--primary)', lineHeight: 1.2 }}>
                         {study.study_desc || 'Estudio de Diagnóstico'}
                       </h4>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                        <strong>Fecha:</strong> {study.study_datetime} | <strong>Acceso:</strong> {study.accession_no} <br/>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
+                        <strong>Fecha:</strong> {study.study_datetime} <br/>
+                        <strong>Acceso:</strong> {study.accession_no} <br/>
                         <strong>Institución:</strong> {study.institution_name || study.hospital || study.location || study.institution || 'Ministerio de Salud'}
                       </p>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minWidth: '180px' }}>
-                      <a href={study.url} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none', whiteSpace: 'nowrap', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
-                        <ImageIcon size={18} /> VER IMAGEN
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', flexWrap: 'wrap' }}>
+                      <a href={study.url} target="_blank" rel="noreferrer" className="btn-primary" style={{ flex: 1, minWidth: '120px', padding: '0.5rem', textDecoration: 'none', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}>
+                        <ImageIcon size={16} /> IMAGEN
                       </a>
-                      {study.informeUrl && (
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      
+                      {study.informeUrl ? (
                           <button 
                             onClick={() => setReportModalData({ url: study.informeUrl, accessionNo: study.accession_no, desc: study.study_desc })} 
                             className="btn-primary" 
-                            style={{ flex: 1, padding: '0.5rem 0.75rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'white', fontSize: '0.875rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.35rem' }}
+                            style={{ flex: 1, minWidth: '120px', padding: '0.5rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', color: 'white', fontSize: '0.85rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.35rem' }}
                           >
                             <FileText size={16} /> VER INFORME
                           </button>
-                          <a 
-                            href={getDownloadReportUrl(study.accession_no)} 
-                            download={`Informe_${study.accession_no}.pdf`}
-                            title="Descargar informe PDF"
-                            className="btn-primary" 
-                            style={{ padding: '0.5rem 0.75rem', backgroundColor: '#1e293b', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', textDecoration: 'none' }}
-                            onClick={() => toast.success('Descargando informe...')}
-                          >
-                            <Download size={16} />
-                          </a>
-                        </div>
+                      ) : (
+                          <div style={{ flex: 1, minWidth: '120px', padding: '0.5rem', backgroundColor: '#f8fafc', color: '#94a3b8', fontSize: '0.8rem', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: 'var(--radius-md)', border: '1px dashed #cbd5e1', textAlign: 'center', lineHeight: 1.2 }}>
+                            Informe no<br/>disponible
+                          </div>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
               
-              {history.length > 10 && (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '2rem', gap: '1rem' }}>
+              {history.length > 6 && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1.5rem', gap: '1rem' }}>
                   <button 
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
                     disabled={currentPage === 1}
                     className="btn-primary" 
-                    style={{ padding: '0.5rem 1rem', background: currentPage === 1 ? '#cbd5e1' : 'var(--primary)' }}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === 1 ? '#cbd5e1' : 'var(--primary)' }}
                   >
                     Anterior
                   </button>
-                  <span style={{ color: 'var(--text-muted)' }}>Página {currentPage} de {Math.ceil(history.length / 10)}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Página {currentPage} de {Math.ceil(history.length / 6)}</span>
                   <button 
-                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(history.length / 10), p + 1))} 
-                    disabled={currentPage === Math.ceil(history.length / 10)}
+                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(history.length / 6), p + 1))} 
+                    disabled={currentPage === Math.ceil(history.length / 6)}
                     className="btn-primary"
-                    style={{ padding: '0.5rem 1rem', background: currentPage === Math.ceil(history.length / 10) ? '#cbd5e1' : 'var(--primary)' }}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === Math.ceil(history.length / 6) ? '#cbd5e1' : 'var(--primary)' }}
                   >
                     Siguiente
                   </button>

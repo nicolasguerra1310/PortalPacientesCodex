@@ -41,7 +41,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5075/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ export default function Login() {
           />
         ))}
         {/* Dark blue translucent overlay */}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(11, 17, 32, 0.75)', zIndex: 1 }}></div>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(11, 17, 32, 0.85)', zIndex: 1 }}></div>
         
         {/* Carousel Content (Left side text) */}
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -128,56 +128,60 @@ export default function Login() {
       </div>
 
       <div className="login-form">
-        <div style={{ marginBottom: '3rem' }}>
-          <h5 style={{ color: '#38bdf8', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 600 }}>Bienvenido</h5>
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'white' }}>Acceso Pacientes</h2>
-          <p style={{ color: '#94a3b8' }}>Ingrese sus datos para consultar sus estudios médicos.</p>
-        </div>
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>DNI del Paciente</label>
-            <input 
-              id="dni"
-              type="text" 
-              name="dni" 
-              value={formData.dni} 
-              onChange={handleChange} 
-              style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: '1px solid #1e293b', backgroundColor: '#1e293b', color: 'white', fontSize: '1rem', outline: 'none' }}
-              placeholder="Ej. 13968693" 
-              required 
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Número de Acceso</label>
-            <input 
-              id="accessNumber"
-              type="text" 
-              name="accessNumber" 
-              value={formData.accessNumber} 
-              onChange={handleChange} 
-              style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: '1px solid #1e293b', backgroundColor: '#1e293b', color: 'white', fontSize: '1rem', outline: 'none' }}
-              placeholder="Ej. 202512345" 
-              required 
-            />
+        <div className="login-form-content">
+          <div style={{ marginBottom: '2.5rem' }}>
+            <h5 style={{ color: '#38bdf8', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 600 }}>Bienvenido</h5>
+            <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'white' }}>Acceso Pacientes</h2>
+            <p style={{ color: '#94a3b8' }}>Ingrese sus datos para consultar sus estudios médicos.</p>
           </div>
 
-          <div style={{ margin: '1rem 0' }}>
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-              onChange={handleCaptchaChange}
-              theme="dark"
-            />
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>DNI del Paciente</label>
+              <input 
+                id="dni"
+                type="text" 
+                name="dni" 
+                value={formData.dni} 
+                onChange={handleChange} 
+                style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: '1px solid #1e293b', backgroundColor: '#1e293b', color: 'white', fontSize: '1rem', outline: 'none' }}
+                placeholder="Ej. 13968693" 
+                required 
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Número de Acceso</label>
+              <input 
+                id="accessNumber"
+                type="text" 
+                name="accessNumber" 
+                value={formData.accessNumber} 
+                onChange={handleChange} 
+                style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: '1px solid #1e293b', backgroundColor: '#1e293b', color: 'white', fontSize: '1rem', outline: 'none' }}
+                placeholder="Ej. 202512345" 
+                required 
+              />
+            </div>
+
+            <div style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'center' }}>
+              <div className="recaptcha-wrapper">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+                  onChange={handleCaptchaChange}
+                  theme="dark"
+                />
+              </div>
+            </div>
+
+            <button type="submit" style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: 'none', backgroundColor: '#0ea5e9', color: 'white', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', transition: 'background-color 0.2s', marginTop: '0.5rem' }} disabled={loading}>
+              {loading ? 'Validando...' : 'Consultar Estudios'}
+            </button>
+          </form>
+
+          <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', borderTop: '1px solid #1e293b', paddingTop: '1.5rem', paddingBottom: '1rem' }}>
+            <img src="/images/logo-ministerio-blanco.png" alt="Ministerio de Salud" className="bottom-logo" />
           </div>
-
-          <button type="submit" style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: 'none', backgroundColor: '#0ea5e9', color: 'white', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', transition: 'background-color 0.2s' }} disabled={loading}>
-            {loading ? 'Validando...' : 'Consultar Estudios'}
-          </button>
-        </form>
-
-        <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', borderTop: '1px solid #1e293b', paddingTop: '2rem' }}>
-          <img src="/images/logo-ministerio-blanco.png" alt="Ministerio de Salud" style={{ height: '130px', objectFit: 'contain' }} />
         </div>
       </div>
     </div>
