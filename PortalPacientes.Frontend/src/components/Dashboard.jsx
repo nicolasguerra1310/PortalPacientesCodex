@@ -208,7 +208,7 @@ export default function Dashboard() {
             <>
               <div className="history-grid">
                 {history.slice((currentPage - 1) * 6, currentPage * 6).map((study, idx) => (
-                  <div key={idx} className="history-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
+                  <div key={idx} className="history-card">
                     <div style={{ marginBottom: '1rem', position: 'relative' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.25rem' }}>
                         <h4 style={{ fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.2, margin: 0, fontWeight: 600 }}>
