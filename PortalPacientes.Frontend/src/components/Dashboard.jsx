@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X, Building, Hash, CheckCircle, Clock } from 'lucide-react';
+import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X, Building, Hash, CheckCircle, Clock, FolderSearch } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
@@ -272,8 +272,12 @@ export default function Dashboard() {
               )}
             </>
           ) : (
-            <div style={{ padding: '2rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)' }}>
-                No se encontraron estudios en su historial para los últimos 10 años.
+            <div style={{ padding: '4rem 2rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', border: '2px dashed var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                <FolderSearch size={48} style={{ color: '#cbd5e1' }} />
+                <div>
+                  <h4 style={{ fontSize: '1.1rem', color: 'var(--secondary)', marginBottom: '0.25rem' }}>Aún no hay estudios en tu historial</h4>
+                  <p style={{ fontSize: '0.9rem', margin: 0 }}>No registramos estudios para este paciente en los últimos 10 años.</p>
+                </div>
             </div>
           )}
         </div>

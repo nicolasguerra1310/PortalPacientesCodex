@@ -9,7 +9,7 @@ import Dashboard from './components/Dashboard';
 function App() {
   return (
     <Router>
-      <Toaster position="top-right" toastOptions={{ style: { borderRadius: '8px', background: '#333', color: '#fff' } }} />
+      <Toaster position="top-right" toastOptions={{ style: { borderRadius: '12px', background: 'var(--secondary)', color: '#fff', border: '1px solid #475569', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' } }} />
       <div className="app-container">
         <header className="main-header">
           <div className="header-logo">
