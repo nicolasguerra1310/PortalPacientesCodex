@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X } from 'lucide-react';
+import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X, Building, Hash, CheckCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [reportModalData, setReportModalData] = useState(null);
+  const [pdfLoading, setPdfLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -65,6 +66,7 @@ export default function Dashboard() {
       }
     };
     if (reportModalData) {
+      setPdfLoading(true);
       window.addEventListener('keydown', handleKeyDown);
     }
     return () => {
@@ -119,37 +121,42 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.25rem' }}>
+      <div className="pill-tabs-container">
         <button 
           onClick={() => setActiveTab('current')}
-          style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: activeTab === 'current' ? '600' : '400', color: activeTab === 'current' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem 1rem', borderBottom: activeTab === 'current' ? '2px solid var(--primary)' : 'none' }}
+          className={`pill-tab ${activeTab === 'current' ? 'active' : ''}`}
         >
-          <ImageIcon size={18} style={{ marginRight: '0.25rem', verticalAlign: 'middle' }}/> Estudio Actual
+          <ImageIcon size={18} style={{ marginRight: '0.25rem' }}/> Estudio Actual
         </button>
         <button 
           onClick={() => setActiveTab('history')}
-          style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: activeTab === 'history' ? '600' : '400', color: activeTab === 'history' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', padding: '0.5rem 1rem', borderBottom: activeTab === 'history' ? '2px solid var(--primary)' : 'none' }}
+          className={`pill-tab ${activeTab === 'history' ? 'active' : ''}`}
         >
-          <History size={18} style={{ marginRight: '0.25rem', verticalAlign: 'middle' }}/> Mi Historial
+          <History size={18} style={{ marginRight: '0.25rem' }}/> Mi Historial
         </button>
       </div>
 
       {activeTab === 'current' && (
         <div className="glass-panel glass-panel-responsive">
-          <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '1.15rem' }}>
-            Estudio Actual Consultado
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '1.15rem' }}>
+              Estudio Actual Consultado
+            </h3>
+            {currentStudy?.informeUrl ? (
+              <span className="badge badge-success"><CheckCircle size={14}/> Informe Listo</span>
+            ) : (
+              <span className="badge badge-pending"><Clock size={14}/> En Proceso</span>
+            )}
+          </div>
           
           <div style={{ padding: '1rem', backgroundColor: '#f8fafc', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem' }}>
-            <p style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>
-              <strong>Estudio:</strong> {currentStudyDetails?.study_desc || 'Estudio de Diagnóstico por Imágenes'}
+            <p style={{ fontSize: '1rem', marginBottom: '0.25rem', fontWeight: 600 }}>
+              {currentStudyDetails?.study_desc || 'Estudio de Diagnóstico por Imágenes'}
             </p>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-              <strong>Efector / Hospital:</strong> {displayHospital}
-            </p>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
-              <strong>Número de Acceso:</strong> {currentAccessNo}
-            </p>
+            <div className="card-metadata">
+              <span className="meta-item"><Building size={16}/> {displayHospital}</span>
+              <span className="meta-item"><Hash size={16}/> {currentAccessNo}</span>
+            </div>
           </div>
 
           <div className="current-study-buttons" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -202,15 +209,22 @@ export default function Dashboard() {
               <div className="history-grid">
                 {history.slice((currentPage - 1) * 6, currentPage * 6).map((study, idx) => (
                   <div key={idx} className="history-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
-                    <div style={{ marginBottom: '1rem' }}>
-                      <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem', color: 'var(--primary)', lineHeight: 1.2 }}>
-                        {study.study_desc || 'Estudio de Diagnóstico'}
-                      </h4>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 0, lineHeight: 1.4 }}>
-                        <strong>Fecha:</strong> {study.study_datetime} <br/>
-                        <strong>Acceso:</strong> {study.accession_no} <br/>
-                        <strong>Institución:</strong> {study.institution_name || study.hospital || study.location || study.institution || 'Ministerio de Salud'}
-                      </p>
+                    <div style={{ marginBottom: '1rem', position: 'relative' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                        <h4 style={{ fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.2, margin: 0, fontWeight: 600 }}>
+                          {study.study_desc || 'Estudio de Diagnóstico'}
+                        </h4>
+                        {study.informeUrl ? (
+                          <span className="badge badge-success"><CheckCircle size={12}/> Listo</span>
+                        ) : (
+                          <span className="badge badge-pending"><Clock size={12}/> Proceso</span>
+                        )}
+                      </div>
+                      <div className="card-metadata">
+                        <span className="meta-item"><Calendar size={14}/> {study.study_datetime}</span>
+                        <span className="meta-item"><Hash size={14}/> {study.accession_no}</span>
+                        <span className="meta-item" style={{ alignItems: 'flex-start' }}><Building size={14} style={{ marginTop: '2px', flexShrink: 0 }}/> <span>{study.institution_name || study.hospital || study.location || study.institution || 'Ministerio de Salud'}</span></span>
+                      </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', flexWrap: 'wrap' }}>
                       <a href={study.url} target="_blank" rel="noreferrer" className="btn-primary" style={{ flex: 1, minWidth: '120px', padding: '0.5rem', textDecoration: 'none', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}>
@@ -306,7 +320,18 @@ export default function Dashboard() {
               </div>
             </div>
             <div style={{ flex: 1, position: 'relative', backgroundColor: '#525659' }}>
-              <iframe src={reportModalData.url} style={{ width: '100%', height: '100%', border: 'none' }} title="Informe Médico" />
+              {pdfLoading && (
+                <div className="pdf-loader-container">
+                  <div className="pdf-loader-spinner"></div>
+                  <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Cargando documento seguro...</p>
+                </div>
+              )}
+              <iframe 
+                src={reportModalData.url} 
+                style={{ width: '100%', height: '100%', border: 'none', position: 'relative', zIndex: 2 }} 
+                title="Informe Médico" 
+                onLoad={() => setPdfLoading(false)}
+              />
             </div>
             <div style={{ padding: '0.5rem 1.25rem', background: '#f8fafc', borderTop: '1px solid var(--border)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
               <span>💡 ¿Problemas para visualizar el visor en tu móvil?</span>

@@ -136,32 +136,30 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>DNI del Paciente</label>
-              <input 
-                id="dni"
-                type="text" 
-                name="dni" 
-                value={formData.dni} 
-                onChange={handleChange} 
-                style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: '1px solid #1e293b', backgroundColor: '#1e293b', color: 'white', fontSize: '1rem', outline: 'none' }}
-                placeholder="Ej. 13968693" 
-                required 
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Número de Acceso</label>
-              <input 
-                id="accessNumber"
-                type="text" 
-                name="accessNumber" 
-                value={formData.accessNumber} 
-                onChange={handleChange} 
-                style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: '1px solid #1e293b', backgroundColor: '#1e293b', color: 'white', fontSize: '1rem', outline: 'none' }}
-                placeholder="Ej. 202512345" 
-                required 
-              />
-            </div>
+          <div className="floating-input-group">
+            <input 
+              id="dni"
+              type="text" 
+              name="dni" 
+              value={formData.dni} 
+              onChange={handleChange} 
+              placeholder=" " 
+              required 
+            />
+            <label htmlFor="dni">DNI del Paciente</label>
+          </div>
+          <div className="floating-input-group">
+            <input 
+              id="accessNumber"
+              type="text" 
+              name="accessNumber" 
+              value={formData.accessNumber} 
+              onChange={handleChange} 
+              placeholder=" " 
+              required 
+            />
+            <label htmlFor="accessNumber">Número de Acceso</label>
+          </div>
 
             <div style={{ margin: '0.5rem 0', display: 'flex', justifyContent: 'center' }}>
               <div className="recaptcha-wrapper">
