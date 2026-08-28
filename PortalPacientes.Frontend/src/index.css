@@ -156,6 +156,16 @@ body {
 }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
+.spin-animation {
+  animation: spin 1s linear infinite;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
+  }
+}
+
 /* Interactive Cards */
 .history-card {
   display: flex;
@@ -167,6 +177,7 @@ body {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
 }
 .history-card:hover {
   transform: translateY(-4px);
@@ -389,22 +400,6 @@ a:hover {
   }
   .dashboard-header button {
       width: 100%;
-  }
-  .current-study-buttons {
-      flex-direction: column !important;
-  }
-  .history-card {
-      flex-direction: column !important;
-      align-items: flex-start !important;
-      gap: 1rem;
-  }
-  .history-card a {
-      width: 100%;
-      text-align: center;
-  }
-  .btn-primary {
-      width: 100%;
-      justify-content: center;
   }
   .hide-mobile {
       display: none !important;

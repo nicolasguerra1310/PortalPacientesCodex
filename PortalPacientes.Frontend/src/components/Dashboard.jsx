@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X, Building, Hash, CheckCircle, Clock, FolderSearch } from 'lucide-react';
+import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X, Building, Hash, CheckCircle, Clock, FolderSearch, Search, RefreshCw, Share2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
@@ -11,8 +11,44 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('current');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [reportModalData, setReportModalData] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const fetchDashboardData = useCallback(async (parsedPatient, accessNumber, showRefreshIndicator = false) => {
+    if (showRefreshIndicator) setIsRefreshing(true);
+    try {
+      const histRes = await fetch(`/api/study/history?dni=${parsedPatient.dni}`);
+      if (histRes.ok) {
+        const histData = await histRes.json();
+        if (histData.success) {
+          setHistory(histData.history || []);
+        } else {
+          if (!showRefreshIndicator) toast.error('Error al obtener el historial.');
+        }
+      }
+
+      const currRes = await fetch(`/api/study/current?dni=${parsedPatient.dni}&accessionNumber=${accessNumber}`);
+      if (currRes.ok) {
+        const currData = await currRes.json();
+        if (currData.success) {
+          setCurrentStudy(currData);
+        } else {
+          if (!showRefreshIndicator) toast.error(currData.message || 'Error al obtener el estudio actual.');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Ocurrió un error al cargar la información.');
+    } finally {
+      if (showRefreshIndicator) {
+        setIsRefreshing(false);
+        toast.success('Información actualizada');
+      }
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -24,40 +60,41 @@ export default function Dashboard() {
     
     const parsedPatient = JSON.parse(patientData);
     setPatient(parsedPatient);
-    
     const accessNumber = localStorage.getItem('currentAccessNumber');
+    
+    fetchDashboardData(parsedPatient, accessNumber, false);
+  }, [navigate, fetchDashboardData]);
 
-    const fetchData = async () => {
-      try {
-        const histRes = await fetch(`/api/study/history?dni=${parsedPatient.dni}`);
-        if (histRes.ok) {
-          const histData = await histRes.json();
-          if (histData.success) {
-            setHistory(histData.history || []);
-          } else {
-            toast.error('Error al obtener el historial.');
-          }
-        }
+  const handleLogout = useCallback((reason) => {
+    localStorage.removeItem('currentAccessNumber');
+    localStorage.removeItem('token');
+    if (reason === 'inactivity') {
+      toast('Sesión cerrada por inactividad (15 min)', { icon: '🔒', duration: 5000 });
+    } else {
+      toast.success('Sesión cerrada correctamente');
+    }
+    navigate('/login');
+  }, [navigate]);
 
-        const currRes = await fetch(`/api/study/current?dni=${parsedPatient.dni}&accessionNumber=${accessNumber}`);
-        if (currRes.ok) {
-          const currData = await currRes.json();
-          if (currData.success) {
-            setCurrentStudy(currData);
-          } else {
-            toast.error(currData.message || 'Error al obtener el estudio actual.');
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error('Ocurrió un error al cargar la información.');
-      } finally {
-        setLoading(false);
-      }
+  useEffect(() => {
+    let timeoutId;
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      // 15 minutes = 15 * 60 * 1000 = 900000 ms
+      timeoutId = setTimeout(() => {
+        handleLogout('inactivity');
+      }, 900000); 
     };
 
-    fetchData();
-  }, [navigate]);
+    const events = ['mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach(event => window.addEventListener(event, resetTimer));
+    resetTimer();
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach(event => window.removeEventListener(event, resetTimer));
+    };
+  }, [handleLogout]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -74,10 +111,63 @@ export default function Dashboard() {
     };
   }, [reportModalData]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('currentAccessNumber');
-    toast.success('Sesión cerrada correctamente');
-    navigate('/login');
+  const handleManualRefresh = () => {
+    const accessNumber = localStorage.getItem('currentAccessNumber');
+    if (patient) {
+      fetchDashboardData(patient, accessNumber, true);
+    }
+  };
+
+  const handleShareLink = async (url, studyDesc) => {
+    const desc = studyDesc || 'Estudio de Diagnóstico';
+    
+    const fallbackCopy = (text) => {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        toast.success('Enlace copiado al portapapeles');
+      } catch (err) {
+        toast.error('No se pudo copiar el enlace automáticamente');
+      }
+      document.body.removeChild(textArea);
+    };
+
+    if (navigator.share && window.isSecureContext) {
+      try {
+        await navigator.share({
+          title: 'Portal de Imágenes - Ministerio de Salud',
+          text: `Te comparto el enlace a mi estudio médico (${desc}):`,
+          url: url
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          fallbackCopy(url);
+        }
+      }
+    } else {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url)
+          .then(() => toast.success('Enlace copiado al portapapeles'))
+          .catch(() => fallbackCopy(url));
+      } else {
+        fallbackCopy(url);
+      }
+    }
+  };
+
+  const handleViewReport = (url, accessionNo, desc) => {
+    if (window.innerWidth <= 768) {
+      window.open(url, '_blank');
+    } else {
+      setReportModalData({ url, accessionNo, desc });
+    }
   };
 
   const getDownloadReportUrl = (accessionNo) => {
@@ -108,6 +198,15 @@ export default function Dashboard() {
   
   // Si el backend no pudo obtener la URL de getstudyurl, usamos la de getstudylist (history)
   const studyUrlToUse = currentStudy?.studyUrl || currentStudyDetails?.url;
+  
+  const filteredHistory = history?.filter(study => 
+    (study.study_desc || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (study.accession_no || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (study.institution_name || study.hospital || study.location || study.institution || '').toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const ITEMS_PER_PAGE = 6;
+  const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
 
   return (
     <div className="animate-fade-in dashboard-container" style={{ width: '100%' }}>
@@ -116,9 +215,20 @@ export default function Dashboard() {
           <h2 className="dashboard-title">Bienvenido, {displayPatientName}</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: 0 }}>DNI: {patient?.dni}</p>
         </div>
-        <button onClick={handleLogout} className="btn-primary logout-btn">
-          <LogOut size={18} /> <span className="logout-text">Cerrar Sesión</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button 
+            onClick={handleManualRefresh} 
+            className="btn-primary" 
+            style={{ backgroundColor: 'white', color: 'var(--text-main)', border: '1px solid var(--border)' }}
+            disabled={isRefreshing}
+            title="Actualizar datos"
+          >
+            <RefreshCw size={18} className={isRefreshing ? "spin-animation" : ""} /> <span className="logout-text">Actualizar</span>
+          </button>
+          <button onClick={handleLogout} className="btn-primary logout-btn">
+            <LogOut size={18} /> <span className="logout-text">Cerrar Sesión</span>
+          </button>
+        </div>
       </div>
 
       <div className="pill-tabs-container">
@@ -159,41 +269,51 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="current-study-buttons" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="current-study-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {studyUrlToUse ? (
-              <a href={studyUrlToUse} target="_blank" rel="noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: '1', minWidth: '200px', fontSize: '1rem', padding: '0.75rem' }}>
-                <ImageIcon size={20} />
-                VER IMAGEN
-              </a>
+              <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                <a href={studyUrlToUse} target="_blank" rel="noreferrer" className="btn-primary" style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem', padding: '0.75rem' }}>
+                  <ImageIcon size={20} />
+                  <span className="hide-mobile">VER </span>IMAGEN
+                </a>
+                <button 
+                  onClick={() => handleShareLink(studyUrlToUse, currentStudyDetails?.study_desc)}
+                  className="btn-primary" 
+                  title="Compartir enlace de imagen"
+                  style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', backgroundColor: '#e2e8f0', color: 'var(--text-main)', border: '1px solid #cbd5e1' }}
+                >
+                  <Share2 size={20} />
+                </button>
+              </div>
             ) : (
-               <div style={{ flex: '1', padding: '0.75rem', textAlign: 'center', background: '#fef2f2', color: 'var(--error)', borderRadius: 'var(--radius-md)', border: '1px solid #fecaca', fontSize: '0.9rem' }}>
+               <div style={{ padding: '0.75rem', textAlign: 'center', background: '#fef2f2', color: 'var(--error)', borderRadius: 'var(--radius-md)', border: '1px solid #fecaca', fontSize: '0.9rem' }}>
                  No hay imágenes disponibles para este estudio.
                </div>
             )}
 
             {currentStudy?.informeUrl ? (
-               <div style={{ display: 'flex', gap: '0.5rem', flex: '1', minWidth: '240px' }}>
+               <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                  <button 
-                   onClick={() => setReportModalData({ url: currentStudy.informeUrl, accessionNo: currentAccessNo, desc: currentStudyDetails?.study_desc })} 
+                   onClick={() => handleViewReport(currentStudy.informeUrl, currentAccessNo, currentStudyDetails?.study_desc)} 
                    className="btn-primary" 
-                   style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: '1', fontSize: '1rem', padding: '0.75rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', fontFamily: 'inherit', color: 'white' }}
+                   style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem', padding: '0.75rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', color: 'white' }}
                  >
                    <FileText size={20} />
-                   VER INFORME
+                   <span className="hide-mobile">VER </span>INFORME
                  </button>
                  <a 
                    href={getDownloadReportUrl(currentAccessNo)} 
                    download={`Informe_${currentAccessNo}.pdf`}
                    title="Descarga directa del informe en PDF"
                    className="btn-primary" 
-                   style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem 1rem', backgroundColor: '#1e293b', color: 'white', textDecoration: 'none' }}
+                   style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', backgroundColor: '#1e293b', color: 'white', textDecoration: 'none' }}
                    onClick={() => toast.success('Descargando informe...')}
                  >
                    <Download size={20} />
                  </a>
                </div>
             ) : (
-               <div style={{ flex: '1', padding: '0.75rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+               <div style={{ padding: '0.75rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                  El informe médico aún no está disponible.
                </div>
             )}
@@ -203,68 +323,115 @@ export default function Dashboard() {
 
       {activeTab === 'history' && (
         <div className="glass-panel glass-panel-responsive">
-          <h3 style={{ marginBottom: '1rem', color: 'var(--text-main)', fontSize: '1.15rem' }}>Historial de Estudios</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.15rem' }}>Historial de Estudios</h3>
+            {history && history.length > 0 && (
+              <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
+                <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input 
+                  type="text" 
+                  placeholder="Buscar por nombre, efector..." 
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                  style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', outline: 'none', fontSize: '0.95rem' }}
+                />
+              </div>
+            )}
+          </div>
+
           {history && history.length > 0 ? (
             <>
-              <div className="history-grid">
-                {history.slice((currentPage - 1) * 6, currentPage * 6).map((study, idx) => (
+              {filteredHistory.length === 0 ? (
+                <div style={{ padding: '3rem 2rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', border: '2px dashed var(--border)' }}>
+                  <FolderSearch size={40} style={{ color: '#cbd5e1', marginBottom: '1rem' }} />
+                  <h4 style={{ fontSize: '1.05rem', color: 'var(--text-main)', margin: '0 0 0.25rem 0' }}>No se encontraron resultados</h4>
+                  <p style={{ margin: 0, fontSize: '0.9rem' }}>Intenta con otro término de búsqueda.</p>
+                </div>
+              ) : (
+                <div className="history-grid">
+                  {filteredHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((study, idx) => (
                   <div key={idx} className="history-card">
-                    <div style={{ marginBottom: '1rem', position: 'relative' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                        <h4 style={{ fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.2, margin: 0, fontWeight: 600 }}>
-                          {study.study_desc || 'Estudio de Diagnóstico'}
-                        </h4>
-                        {study.informeUrl ? (
-                          <span className="badge badge-success"><CheckCircle size={12}/> Listo</span>
-                        ) : (
-                          <span className="badge badge-pending"><Clock size={12}/> Proceso</span>
-                        )}
-                      </div>
+                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10 }}>
+                      {study.informeUrl ? (
+                        <span className="badge badge-success"><CheckCircle size={12}/> Listo</span>
+                      ) : (
+                        <span className="badge badge-pending"><Clock size={12}/> Proceso</span>
+                      )}
+                    </div>
+                    
+                    <div style={{ marginBottom: '1.25rem', position: 'relative' }}>
+                      <h4 style={{ fontSize: '1.05rem', color: 'var(--text-main)', lineHeight: 1.3, margin: '0 0 0.75rem 0', fontWeight: 600, paddingRight: '5rem' }}>
+                        {study.study_desc || 'Estudio de Diagnóstico'}
+                      </h4>
                       <div className="card-metadata">
                         <span className="meta-item"><Calendar size={14}/> {study.study_datetime}</span>
                         <span className="meta-item"><Hash size={14}/> {study.accession_no}</span>
                         <span className="meta-item" style={{ alignItems: 'flex-start' }}><Building size={14} style={{ marginTop: '2px', flexShrink: 0 }}/> <span>{study.institution_name || study.hospital || study.location || study.institution || 'Ministerio de Salud'}</span></span>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto', flexWrap: 'wrap' }}>
-                      <a href={study.url} target="_blank" rel="noreferrer" className="btn-primary" style={{ flex: 1, minWidth: '120px', padding: '0.5rem', textDecoration: 'none', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem' }}>
-                        <ImageIcon size={16} /> IMAGEN
-                      </a>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                        <a href={study.url} target="_blank" rel="noreferrer" className="btn-primary" style={{ flex: '1', padding: '0.75rem', textDecoration: 'none', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
+                          <ImageIcon size={18} /> <span className="hide-mobile">VER </span>IMAGEN
+                        </a>
+                        <button 
+                          onClick={() => handleShareLink(study.url, study.study_desc)}
+                          className="btn-primary" 
+                          title="Compartir enlace de imagen"
+                          style={{ width: '56px', flexShrink: 0, padding: '0', backgroundColor: '#e2e8f0', color: 'var(--text-main)', border: '1px solid #cbd5e1', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                        >
+                          <Share2 size={18} />
+                        </button>
+                      </div>
                       
                       {study.informeUrl ? (
+                        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                           <button 
-                            onClick={() => setReportModalData({ url: study.informeUrl, accessionNo: study.accession_no, desc: study.study_desc })} 
+                            onClick={() => handleViewReport(study.informeUrl, study.accession_no, study.study_desc)} 
                             className="btn-primary" 
-                            style={{ flex: 1, minWidth: '120px', padding: '0.5rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', color: 'white', fontSize: '0.85rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.35rem' }}
+                            style={{ flex: '1', padding: '0.75rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', color: 'white', fontSize: '0.95rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
                           >
-                            <FileText size={16} /> VER INFORME
+                            <FileText size={18} /> <span className="hide-mobile">VER </span>INFORME
                           </button>
+                          <a 
+                            href={getDownloadReportUrl(study.accession_no)} 
+                            download={`Informe_${study.accession_no}.pdf`}
+                            title="Descarga directa del informe en PDF"
+                            className="btn-primary" 
+                            style={{ width: '56px', flexShrink: 0, padding: '0', backgroundColor: '#1e293b', color: 'white', border: 'none', textDecoration: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                            onClick={() => toast.success('Descargando informe...')}
+                          >
+                            <Download size={18} />
+                          </a>
+                        </div>
                       ) : (
-                          <div style={{ flex: 1, minWidth: '120px', padding: '0.5rem', backgroundColor: '#f8fafc', color: '#94a3b8', fontSize: '0.8rem', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: 'var(--radius-md)', border: '1px dashed #cbd5e1', textAlign: 'center', lineHeight: 1.2 }}>
-                            Informe no<br/>disponible
-                          </div>
+                        <div style={{ padding: '0.75rem', backgroundColor: '#f8fafc', color: '#94a3b8', fontSize: '0.9rem', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: 'var(--radius-md)', border: '1px dashed #cbd5e1', textAlign: 'center' }}>
+                          Informe no disponible
+                        </div>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
+              )}
               
-              {history.length > 6 && (
+              {filteredHistory.length > ITEMS_PER_PAGE && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1.5rem', gap: '1rem' }}>
                   <button 
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
                     disabled={currentPage === 1}
                     className="btn-primary" 
-                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === 1 ? '#cbd5e1' : 'var(--primary)' }}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === 1 ? '#cbd5e1' : 'var(--primary)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
                   >
                     Anterior
                   </button>
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Página {currentPage} de {Math.ceil(history.length / 6)}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 500 }}>Página {currentPage} de {totalPages}</span>
                   <button 
-                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(history.length / 6), p + 1))} 
-                    disabled={currentPage === Math.ceil(history.length / 6)}
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
+                    disabled={currentPage === totalPages}
                     className="btn-primary"
-                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === Math.ceil(history.length / 6) ? '#cbd5e1' : 'var(--primary)' }}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === totalPages ? '#cbd5e1' : 'var(--primary)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
                   >
                     Siguiente
                   </button>
