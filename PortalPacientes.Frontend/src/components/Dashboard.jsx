@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X, Building, Hash, CheckCircle, Clock, FolderSearch, Search, RefreshCw, Share2 } from 'lucide-react';
+import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X, Building, Hash, CheckCircle, Clock, FolderSearch, Search, RefreshCw, Share2, Filter, ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
@@ -15,6 +15,8 @@ export default function Dashboard() {
   const [reportModalData, setReportModalData] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [sortOrder, setSortOrder] = useState('DESC');
 
   const fetchDashboardData = useCallback(async (parsedPatient, accessNumber, showRefreshIndicator = false) => {
     if (showRefreshIndicator) setIsRefreshing(true);
@@ -177,13 +179,42 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="dashboard-container" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-        <div className="skeleton skeleton-title"></div>
-        <div className="glass-panel" style={{ padding: '2rem' }}>
-           <div className="skeleton skeleton-title" style={{ width: '30%' }}></div>
-           <div className="skeleton skeleton-text"></div>
-           <div className="skeleton skeleton-text" style={{ width: '60%' }}></div>
-           <div className="skeleton skeleton-card" style={{ height: '200px', marginTop: '2rem' }}></div>
+      <div className="dashboard-container" style={{ width: '100%', padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <div>
+            <div className="skeleton" style={{ height: '2rem', width: '250px', marginBottom: '0.5rem', borderRadius: '4px' }}></div>
+            <div className="skeleton" style={{ height: '1rem', width: '150px', borderRadius: '4px' }}></div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div className="skeleton hide-mobile" style={{ height: '40px', width: '120px', borderRadius: '8px' }}></div>
+            <div className="skeleton" style={{ height: '40px', width: '150px', borderRadius: '8px' }}></div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+          <div className="skeleton" style={{ height: '40px', width: '140px', borderRadius: '999px' }}></div>
+          <div className="skeleton" style={{ height: '40px', width: '140px', borderRadius: '999px' }}></div>
+        </div>
+
+        <div className="glass-panel" style={{ padding: '2rem', border: '1px solid var(--border)' }}>
+           <div className="skeleton" style={{ height: '1.5rem', width: '30%', marginBottom: '1.5rem', borderRadius: '4px' }}></div>
+           
+           <div style={{ padding: '1rem', border: '1px solid var(--border)', borderRadius: '8px', marginBottom: '1.5rem' }}>
+             <div className="skeleton" style={{ height: '1.2rem', width: '60%', marginBottom: '0.75rem', borderRadius: '4px' }}></div>
+             <div className="skeleton" style={{ height: '1rem', width: '40%', marginBottom: '0.5rem', borderRadius: '4px' }}></div>
+             <div className="skeleton" style={{ height: '1rem', width: '30%', borderRadius: '4px' }}></div>
+           </div>
+
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                 <div className="skeleton" style={{ height: '48px', flex: 1, borderRadius: '8px' }}></div>
+                 <div className="skeleton" style={{ height: '48px', width: '56px', borderRadius: '8px' }}></div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                 <div className="skeleton" style={{ height: '48px', flex: 1, borderRadius: '8px' }}></div>
+                 <div className="skeleton" style={{ height: '48px', width: '56px', borderRadius: '8px' }}></div>
+              </div>
+           </div>
         </div>
       </div>
     );
@@ -199,11 +230,23 @@ export default function Dashboard() {
   // Si el backend no pudo obtener la URL de getstudyurl, usamos la de getstudylist (history)
   const studyUrlToUse = currentStudy?.studyUrl || currentStudyDetails?.url;
   
-  const filteredHistory = history?.filter(study => 
-    (study.study_desc || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (study.accession_no || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (study.institution_name || study.hospital || study.location || study.institution || '').toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredHistory = (history || [])
+    .filter(study => {
+      const matchSearch = (study.study_desc || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (study.accession_no || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (study.institution_name || study.hospital || study.location || study.institution || '').toLowerCase().includes(searchTerm.toLowerCase());
+      
+      let matchStatus = true;
+      if (filterStatus === 'READY') matchStatus = !!study.informeUrl;
+      if (filterStatus === 'PENDING') matchStatus = !study.informeUrl;
+
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.study_datetime);
+      const dateB = new Date(b.study_datetime);
+      return sortOrder === 'DESC' ? dateB - dateA : dateA - dateB;
+    });
 
   const ITEMS_PER_PAGE = 6;
   const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
@@ -323,18 +366,44 @@ export default function Dashboard() {
 
       {activeTab === 'history' && (
         <div className="glass-panel glass-panel-responsive">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.15rem' }}>Historial de Estudios</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.15rem' }}>Historial de Estudios</h3>
+              {history && history.length > 0 && (
+                <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
+                  <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input 
+                    type="text" 
+                    placeholder="Buscar por nombre, efector..." 
+                    value={searchTerm}
+                    onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                    style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', outline: 'none', fontSize: '0.95rem' }}
+                  />
+                </div>
+              )}
+            </div>
+            
             {history && history.length > 0 && (
-              <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
-                <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input 
-                  type="text" 
-                  placeholder="Buscar por nombre, efector..." 
-                  value={searchTerm}
-                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                  style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', outline: 'none', fontSize: '0.95rem' }}
-                />
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', width: '100%' }}>
+                <button 
+                  onClick={() => { 
+                    setFilterStatus(prev => prev === 'ALL' ? 'READY' : prev === 'READY' ? 'PENDING' : 'ALL'); 
+                    setCurrentPage(1); 
+                  }}
+                  className="btn-primary"
+                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: filterStatus !== 'ALL' ? 'var(--primary)' : 'white', color: filterStatus !== 'ALL' ? 'white' : 'var(--text-muted)', border: '1px solid', borderColor: filterStatus !== 'ALL' ? 'var(--primary)' : 'var(--border)' }}
+                >
+                  <Filter size={14} /> 
+                  {filterStatus === 'ALL' ? 'Todos' : filterStatus === 'READY' ? 'Con informe' : 'Sin informe'}
+                </button>
+                <button 
+                  onClick={() => { setSortOrder(sortOrder === 'DESC' ? 'ASC' : 'DESC'); setCurrentPage(1); }}
+                  className="btn-primary"
+                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: 'white', color: 'var(--text-muted)', border: '1px solid var(--border)' }}
+                >
+                  {sortOrder === 'DESC' ? <ArrowDownAZ size={14} /> : <ArrowUpAZ size={14} />} 
+                  {sortOrder === 'DESC' ? 'Más recientes' : 'Más antiguos'}
+                </button>
               </div>
             )}
           </div>
