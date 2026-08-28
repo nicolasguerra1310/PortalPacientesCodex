@@ -17,8 +17,8 @@ namespace PortalPacientes.Backend.Services
 
             // Retornamos datos de prueba por ahora
             return (
-                PatientName: "Juan Pérez (Dato de BD Genexus)", 
-                HospitalName: "Hospital Padilla (Dato de BD Genexus)"
+                PatientName: "Paciente123", 
+                HospitalName: "Ministerio de Salud"
             );
         }
     }

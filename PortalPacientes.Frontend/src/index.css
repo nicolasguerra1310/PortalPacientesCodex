@@ -2,8 +2,8 @@
   --primary: #0ea5e9;
   --primary-hover: #0284c7;
   --secondary: #334155;
-  --bg-color: #f1f5f9;
-  --card-bg: #ffffff;
+  --bg-color: var(--panel-bg-alt);
+  --card-bg: var(--card-bg);
   --text-main: #0f172a;
   --text-muted: #64748b;
   --border: #e2e8f0;
@@ -18,12 +18,42 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  --panel-bg: #f8fafc;
+  --panel-bg-alt: var(--panel-bg-alt);
+  --btn-secondary: #e2e8f0;
+  --btn-secondary-border: #cbd5e1;
+  --btn-dark: #334155;
+  --btn-darker: #1e293b;
+}
+
+[data-theme='dark'] {
+  --primary: #0ea5e9;
+  --primary-hover: #38bdf8;
+  --secondary: #94a3b8;
+  --bg-color: #0b1120;
+  --card-bg: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --panel-bg: #0f172a;
+  --panel-bg-alt: #1e293b;
+  --btn-secondary: #334155;
+  --btn-secondary-border: #475569;
+  --btn-dark: #38bdf8; 
+  --btn-darker: #0ea5e9;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+input, textarea, select {
+  background-color: var(--card-bg);
+  color: var(--text-main);
+  border-color: var(--border);
 }
 
 body {
@@ -76,7 +106,7 @@ body {
 /* Pill Tabs */
 .pill-tabs-container {
   display: inline-flex;
-  background-color: #e2e8f0;
+  background-color: var(--btn-secondary);
   border-radius: 9999px;
   padding: 0.25rem;
   margin-bottom: 1.5rem;
@@ -100,7 +130,7 @@ body {
   color: var(--text-main);
 }
 .pill-tab.active {
-  background-color: white;
+  background-color: var(--card-bg);
   color: var(--primary);
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   font-weight: 600;
@@ -119,7 +149,7 @@ body {
   letter-spacing: 0.5px;
 }
 .badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-.badge-pending { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+.badge-pending { background: var(--panel-bg-alt); color: var(--text-main); border: 1px solid var(--border); }
 
 .card-metadata {
   display: flex;
@@ -148,7 +178,7 @@ body {
 }
 .pdf-loader-spinner {
   width: 40px; height: 40px;
-  border: 4px solid #e2e8f0;
+  border: 4px solid var(--btn-secondary);
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -200,10 +230,10 @@ a:hover {
 
 /* Premium Utilities */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--card-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--border);
   box-shadow: var(--shadow-lg);
   border-radius: var(--radius-lg);
 }
@@ -243,7 +273,7 @@ a:hover {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
-  background-color: #ffffff;
+  background-color: var(--card-bg);
 }
 
 .input-label {
@@ -393,13 +423,8 @@ a:hover {
 }
 
 @media (max-width: 768px) {
-  .dashboard-header {
-      flex-direction: column !important;
-      align-items: flex-start !important;
+  .dashboard-header-container {
       gap: 1rem;
-  }
-  .dashboard-header button {
-      width: 100%;
   }
   .hide-mobile {
       display: none !important;
@@ -412,8 +437,8 @@ a:hover {
 }
 
 .skeleton {
-  background: #f6f7f8;
-  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background: var(--panel-bg);
+  background-image: linear-gradient(to right, var(--panel-bg) 0%, var(--btn-secondary) 20%, var(--panel-bg) 40%, var(--panel-bg) 100%);
   background-repeat: no-repeat;
   background-size: 1000px 100%;
   animation-duration: 1.5s;

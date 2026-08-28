@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X, Building, Hash, CheckCircle, Clock, FolderSearch, Search, RefreshCw, Share2, Filter, ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
+import { FileText, Calendar, LogOut, Image as ImageIcon, History, Download, ExternalLink, X, Building, Hash, CheckCircle, Clock, FolderSearch, Search, RefreshCw, Share2, Filter, ArrowDownAZ, ArrowUpAZ, Moon, Sun } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
@@ -17,6 +17,17 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [sortOrder, setSortOrder] = useState('DESC');
+
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
 
   const fetchDashboardData = useCallback(async (parsedPatient, accessNumber, showRefreshIndicator = false) => {
     if (showRefreshIndicator) setIsRefreshing(true);
@@ -258,18 +269,30 @@ export default function Dashboard() {
           <h2 className="dashboard-title">Bienvenido, {displayPatientName}</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: 0 }}>DNI: {patient?.dni}</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <button 
+            onClick={toggleTheme} 
+            className="btn-primary" 
+            style={{ height: '42px', width: '42px', backgroundColor: 'var(--card-bg)', color: 'var(--text-main)', border: '1px solid var(--border)', padding: '0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            title="Cambiar tema"
+          >
+            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
           <button 
             onClick={handleManualRefresh} 
             className="btn-primary" 
-            style={{ backgroundColor: 'white', color: 'var(--text-main)', border: '1px solid var(--border)' }}
+            style={{ height: '42px', padding: '0 1rem', backgroundColor: 'var(--card-bg)', color: 'var(--text-main)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
             disabled={isRefreshing}
             title="Actualizar datos"
           >
             <RefreshCw size={18} className={isRefreshing ? "spin-animation" : ""} /> <span className="logout-text">Actualizar</span>
           </button>
-          <button onClick={handleLogout} className="btn-primary logout-btn">
-            <LogOut size={18} /> <span className="logout-text">Cerrar Sesión</span>
+          <button 
+            onClick={() => handleLogout('user')} 
+            className="btn-primary" 
+            style={{ height: '42px', padding: '0 1rem', backgroundColor: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <LogOut size={18} /> <span className="logout-text">Salir</span>
           </button>
         </div>
       </div>
@@ -302,7 +325,7 @@ export default function Dashboard() {
             )}
           </div>
           
-          <div style={{ padding: '1rem', backgroundColor: '#f8fafc', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem' }}>
+          <div style={{ padding: '1rem', backgroundColor: 'var(--panel-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem' }}>
             <p style={{ fontSize: '1rem', marginBottom: '0.25rem', fontWeight: 600 }}>
               {currentStudyDetails?.study_desc || 'Estudio de Diagnóstico por Imágenes'}
             </p>
@@ -323,7 +346,7 @@ export default function Dashboard() {
                   onClick={() => handleShareLink(studyUrlToUse, currentStudyDetails?.study_desc)}
                   className="btn-primary" 
                   title="Compartir enlace de imagen"
-                  style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', backgroundColor: '#e2e8f0', color: 'var(--text-main)', border: '1px solid #cbd5e1' }}
+                  style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', backgroundColor: 'var(--btn-secondary)', color: 'var(--text-main)', border: '1px solid var(--btn-secondary-border)' }}
                 >
                   <Share2 size={20} />
                 </button>
@@ -339,7 +362,7 @@ export default function Dashboard() {
                  <button 
                    onClick={() => handleViewReport(currentStudy.informeUrl, currentAccessNo, currentStudyDetails?.study_desc)} 
                    className="btn-primary" 
-                   style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem', padding: '0.75rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', color: 'white' }}
+                   style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem', padding: '0.75rem', backgroundColor: 'var(--btn-dark)', border: 'none', cursor: 'pointer', color: 'white' }}
                  >
                    <FileText size={20} />
                    <span className="hide-mobile">VER </span>INFORME
@@ -349,14 +372,14 @@ export default function Dashboard() {
                    download={`Informe_${currentAccessNo}.pdf`}
                    title="Descarga directa del informe en PDF"
                    className="btn-primary" 
-                   style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', backgroundColor: '#1e293b', color: 'white', textDecoration: 'none' }}
+                   style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', backgroundColor: 'var(--btn-darker)', color: 'white', textDecoration: 'none' }}
                    onClick={() => toast.success('Descargando informe...')}
                  >
                    <Download size={20} />
                  </a>
                </div>
             ) : (
-               <div style={{ padding: '0.75rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+               <div style={{ padding: '0.75rem', textAlign: 'center', background: 'var(--panel-bg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                  El informe médico aún no está disponible.
                </div>
             )}
@@ -391,7 +414,7 @@ export default function Dashboard() {
                     setCurrentPage(1); 
                   }}
                   className="btn-primary"
-                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: filterStatus !== 'ALL' ? 'var(--primary)' : 'white', color: filterStatus !== 'ALL' ? 'white' : 'var(--text-muted)', border: '1px solid', borderColor: filterStatus !== 'ALL' ? 'var(--primary)' : 'var(--border)' }}
+                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: filterStatus !== 'ALL' ? 'var(--primary)' : 'var(--card-bg)', color: filterStatus !== 'ALL' ? 'white' : 'var(--text-muted)', border: '1px solid', borderColor: filterStatus !== 'ALL' ? 'var(--primary)' : 'var(--border)' }}
                 >
                   <Filter size={14} /> 
                   {filterStatus === 'ALL' ? 'Todos' : filterStatus === 'READY' ? 'Con informe' : 'Sin informe'}
@@ -411,8 +434,8 @@ export default function Dashboard() {
           {history && history.length > 0 ? (
             <>
               {filteredHistory.length === 0 ? (
-                <div style={{ padding: '3rem 2rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', border: '2px dashed var(--border)' }}>
-                  <FolderSearch size={40} style={{ color: '#cbd5e1', marginBottom: '1rem' }} />
+                <div style={{ padding: '3rem 2rem', textAlign: 'center', background: 'var(--panel-bg)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', border: '2px dashed var(--border)' }}>
+                  <FolderSearch size={40} style={{ color: 'var(--btn-secondary-border)', marginBottom: '1rem' }} />
                   <h4 style={{ fontSize: '1.05rem', color: 'var(--text-main)', margin: '0 0 0.25rem 0' }}>No se encontraron resultados</h4>
                   <p style={{ margin: 0, fontSize: '0.9rem' }}>Intenta con otro término de búsqueda.</p>
                 </div>
@@ -448,7 +471,7 @@ export default function Dashboard() {
                           onClick={() => handleShareLink(study.url, study.study_desc)}
                           className="btn-primary" 
                           title="Compartir enlace de imagen"
-                          style={{ width: '56px', flexShrink: 0, padding: '0', backgroundColor: '#e2e8f0', color: 'var(--text-main)', border: '1px solid #cbd5e1', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                          style={{ width: '56px', flexShrink: 0, padding: '0', backgroundColor: 'var(--btn-secondary)', color: 'var(--text-main)', border: '1px solid var(--btn-secondary-border)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                         >
                           <Share2 size={18} />
                         </button>
@@ -459,7 +482,7 @@ export default function Dashboard() {
                           <button 
                             onClick={() => handleViewReport(study.informeUrl, study.accession_no, study.study_desc)} 
                             className="btn-primary" 
-                            style={{ flex: '1', padding: '0.75rem', backgroundColor: '#334155', border: 'none', cursor: 'pointer', color: 'white', fontSize: '0.95rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                            style={{ flex: '1', padding: '0.75rem', backgroundColor: 'var(--btn-dark)', border: 'none', cursor: 'pointer', color: 'white', fontSize: '0.95rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
                           >
                             <FileText size={18} /> <span className="hide-mobile">VER </span>INFORME
                           </button>
@@ -468,14 +491,14 @@ export default function Dashboard() {
                             download={`Informe_${study.accession_no}.pdf`}
                             title="Descarga directa del informe en PDF"
                             className="btn-primary" 
-                            style={{ width: '56px', flexShrink: 0, padding: '0', backgroundColor: '#1e293b', color: 'white', border: 'none', textDecoration: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                            style={{ width: '56px', flexShrink: 0, padding: '0', backgroundColor: 'var(--btn-darker)', color: 'white', border: 'none', textDecoration: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                             onClick={() => toast.success('Descargando informe...')}
                           >
                             <Download size={18} />
                           </a>
                         </div>
                       ) : (
-                        <div style={{ padding: '0.75rem', backgroundColor: '#f8fafc', color: '#94a3b8', fontSize: '0.9rem', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: 'var(--radius-md)', border: '1px dashed #cbd5e1', textAlign: 'center' }}>
+                        <div style={{ padding: '0.75rem', backgroundColor: 'var(--panel-bg)', color: '#94a3b8', fontSize: '0.9rem', display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: 'var(--radius-md)', border: '1px dashed var(--btn-secondary-border)', textAlign: 'center' }}>
                           Informe no disponible
                         </div>
                       )}
@@ -491,7 +514,7 @@ export default function Dashboard() {
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
                     disabled={currentPage === 1}
                     className="btn-primary" 
-                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === 1 ? '#cbd5e1' : 'var(--primary)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === 1 ? 'var(--btn-secondary-border)' : 'var(--primary)', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
                   >
                     Anterior
                   </button>
@@ -500,7 +523,7 @@ export default function Dashboard() {
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
                     disabled={currentPage === totalPages}
                     className="btn-primary"
-                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === totalPages ? '#cbd5e1' : 'var(--primary)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', background: currentPage === totalPages ? 'var(--btn-secondary-border)' : 'var(--primary)', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
                   >
                     Siguiente
                   </button>
@@ -508,8 +531,8 @@ export default function Dashboard() {
               )}
             </>
           ) : (
-            <div style={{ padding: '4rem 2rem', textAlign: 'center', background: '#f8fafc', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', border: '2px dashed var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
-                <FolderSearch size={48} style={{ color: '#cbd5e1' }} />
+            <div style={{ padding: '4rem 2rem', textAlign: 'center', background: 'var(--panel-bg)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', border: '2px dashed var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
+                <FolderSearch size={48} style={{ color: 'var(--btn-secondary-border)' }} />
                 <div>
                   <h4 style={{ fontSize: '1.1rem', color: 'var(--secondary)', marginBottom: '0.25rem' }}>Aún no hay estudios en tu historial</h4>
                   <p style={{ fontSize: '0.9rem', margin: 0 }}>No registramos estudios para este paciente en los últimos 10 años.</p>
@@ -521,8 +544,8 @@ export default function Dashboard() {
 
       {reportModalData && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }} onClick={() => setReportModalData(null)}>
-          <div style={{ width: '100%', maxWidth: '950px', height: '92vh', background: '#fff', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)' }} onClick={e => e.stopPropagation()}>
-            <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div style={{ width: '100%', maxWidth: '950px', height: '92vh', background: 'var(--card-bg)', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--panel-bg)', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: '200px' }}>
                 <FileText size={22} color="var(--primary)" />
                 <div>
@@ -536,7 +559,7 @@ export default function Dashboard() {
                   target="_blank" 
                   rel="noreferrer" 
                   className="btn-primary" 
-                  style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem', backgroundColor: '#f1f5f9', color: 'var(--text-main)', border: '1px solid var(--border)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', boxShadow: 'none' }}
+                  style={{ padding: '0.45rem 0.85rem', fontSize: '0.85rem', backgroundColor: 'var(--panel-bg-alt)', color: 'var(--text-main)', border: '1px solid var(--border)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', boxShadow: 'none' }}
                 >
                   <ExternalLink size={15} /> <span className="hide-mobile">Abrir en pestaña</span>
                 </a>
@@ -573,7 +596,7 @@ export default function Dashboard() {
                 onLoad={() => setPdfLoading(false)}
               />
             </div>
-            <div style={{ padding: '0.5rem 1.25rem', background: '#f8fafc', borderTop: '1px solid var(--border)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ padding: '0.5rem 1.25rem', background: 'var(--panel-bg)', borderTop: '1px solid var(--border)', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
               <span>💡 ¿Problemas para visualizar el visor en tu móvil?</span>
               <a href={reportModalData.url} target="_blank" rel="noreferrer" style={{ fontWeight: 600, color: 'var(--primary)' }}>
                 Abrir PDF directo en pantalla completa
