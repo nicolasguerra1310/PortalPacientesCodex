@@ -259,6 +259,32 @@ a:hover {
   transform: translateY(0);
 }
 
+.btn-action-img {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+}
+.btn-action-img:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-action-rep {
+  background-color: var(--btn-dark);
+  color: white;
+  border: none;
+}
+.btn-action-rep:hover {
+  background-color: var(--btn-darker);
+}
+
+[data-theme='dark'] .btn-action-rep {
+  background-color: #475569;
+  color: white;
+}
+[data-theme='dark'] .btn-action-rep:hover {
+  background-color: #334155;
+}
+
 .input-field {
   width: 100%;
   padding: 0.75rem 1rem;

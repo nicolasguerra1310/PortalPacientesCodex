@@ -385,15 +385,15 @@ export default function Dashboard() {
           <div className="current-study-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {studyUrlToUse ? (
               <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
-                <a href={studyUrlToUse} target="_blank" rel="noreferrer" className="btn-primary" style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem', padding: '0.75rem' }}>
+                <a href={studyUrlToUse} target="_blank" rel="noreferrer" className="btn-primary btn-action-img" style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem', padding: '0.75rem' }}>
                   <ImageIcon size={20} />
                   <span className="hide-mobile">VER </span>IMAGEN
                 </a>
                 <button 
                   onClick={() => handleShareLink(studyUrlToUse, currentStudyDetails?.study_desc)}
-                  className="btn-primary" 
+                  className="btn-primary btn-action-img" 
                   title="Compartir enlace de imagen"
-                  style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', backgroundColor: 'var(--btn-secondary)', color: 'var(--text-main)', border: '1px solid var(--btn-secondary-border)' }}
+                  style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0' }}
                 >
                   <Share2 size={20} />
                 </button>
@@ -408,8 +408,8 @@ export default function Dashboard() {
                <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                  <button 
                    onClick={() => handleViewReport(currentStudy.informeUrl, currentAccessNo, currentStudyDetails?.study_desc)} 
-                   className="btn-primary" 
-                   style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem', padding: '0.75rem', backgroundColor: 'var(--btn-dark)', border: 'none', cursor: 'pointer', color: 'white' }}
+                   className="btn-primary btn-action-rep" 
+                   style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem', padding: '0.75rem', cursor: 'pointer' }}
                  >
                    <FileText size={20} />
                    <span className="hide-mobile">VER </span>INFORME
@@ -418,8 +418,8 @@ export default function Dashboard() {
                    href={getDownloadReportUrl(currentAccessNo)} 
                    download={`Informe_${currentAccessNo}.pdf`}
                    title="Descarga directa del informe en PDF"
-                   className="btn-primary" 
-                   style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', backgroundColor: 'var(--btn-darker)', color: 'white', textDecoration: 'none' }}
+                   className="btn-primary btn-action-rep" 
+                   style={{ width: '56px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', textDecoration: 'none' }}
                    onClick={() => toast.success('Descargando informe...')}
                  >
                    <Download size={20} />
@@ -478,7 +478,7 @@ export default function Dashboard() {
                 <button 
                   onClick={() => { setSortOrder(sortOrder === 'DESC' ? 'ASC' : 'DESC'); setCurrentPage(1); }}
                   className="btn-primary"
-                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: 'white', color: 'var(--text-muted)', border: '1px solid var(--border)' }}
+                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: 'var(--card-bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}
                 >
                   {sortOrder === 'DESC' ? <ArrowDownAZ size={14} /> : <ArrowUpAZ size={14} />} 
                   {sortOrder === 'DESC' ? 'Más recientes' : 'Más antiguos'}
@@ -520,14 +520,14 @@ export default function Dashboard() {
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
                       <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
-                        <a href={study.url} target="_blank" rel="noreferrer" className="btn-primary" style={{ flex: '1', padding: '0.75rem', textDecoration: 'none', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
+                        <a href={study.url} target="_blank" rel="noreferrer" className="btn-primary btn-action-img" style={{ flex: '1', padding: '0.75rem', textDecoration: 'none', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
                           <ImageIcon size={18} /> <span className="hide-mobile">VER </span>IMAGEN
                         </a>
                         <button 
                           onClick={() => handleShareLink(study.url, study.study_desc)}
-                          className="btn-primary" 
+                          className="btn-primary btn-action-img" 
                           title="Compartir enlace de imagen"
-                          style={{ width: '56px', flexShrink: 0, padding: '0', backgroundColor: 'var(--btn-secondary)', color: 'var(--text-main)', border: '1px solid var(--btn-secondary-border)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                          style={{ width: '56px', flexShrink: 0, padding: '0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                         >
                           <Share2 size={18} />
                         </button>
@@ -537,8 +537,8 @@ export default function Dashboard() {
                         <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                           <button 
                             onClick={() => handleViewReport(study.informeUrl, study.accession_no, study.study_desc)} 
-                            className="btn-primary" 
-                            style={{ flex: '1', padding: '0.75rem', backgroundColor: 'var(--btn-dark)', border: 'none', cursor: 'pointer', color: 'white', fontSize: '0.95rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                            className="btn-primary btn-action-rep" 
+                            style={{ flex: '1', padding: '0.75rem', cursor: 'pointer', fontSize: '0.95rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
                           >
                             <FileText size={18} /> <span className="hide-mobile">VER </span>INFORME
                           </button>
@@ -546,8 +546,8 @@ export default function Dashboard() {
                             href={getDownloadReportUrl(study.accession_no)} 
                             download={`Informe_${study.accession_no}.pdf`}
                             title="Descarga directa del informe en PDF"
-                            className="btn-primary" 
-                            style={{ width: '56px', flexShrink: 0, padding: '0', backgroundColor: 'var(--btn-darker)', color: 'white', border: 'none', textDecoration: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                            className="btn-primary btn-action-rep" 
+                            style={{ width: '56px', flexShrink: 0, padding: '0', textDecoration: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                             onClick={() => toast.success('Descargando informe...')}
                           >
                             <Download size={18} />
