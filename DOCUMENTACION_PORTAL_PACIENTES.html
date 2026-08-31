@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Documentación Técnica - Portal de Pacientes</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            font-size: 13px;
+        }
+        .header-banner {
+            border-bottom: 3px solid #0ea5e9;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-banner h1 {
+            color: #0f172a;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .header-banner .subtitle {
+            color: #0ea5e9;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            background: #f8fafc;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .meta-table td {
+            padding: 8px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 12px;
+        }
+        .meta-table td strong {
+            color: #475569;
+        }
+        h2 {
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 6px;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        h3 {
+            color: #0284c7;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        ul, ol {
+            margin-top: 4px;
+            margin-bottom: 12px;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 4px;
+        }
+        .diagram-box {
+            background: #0f172a;
+            color: #38bdf8;
+            font-family: 'Consolas', 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 11px;
+            line-height: 1.4;
+            white-space: pre;
+            margin: 15px 0;
+            overflow-x: auto;
+            border: 1px solid #1e293b;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        table.data-table th {
+            background-color: #0ea5e9;
+            color: white;
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        table.data-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 12px;
+        }
+        table.data-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        code {
+            background: #f1f5f9;
+            color: #0284c7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+        }
+        pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+            overflow-x: auto;
+        }
+        .badge-ready {
+            background: #dcfce7;
+            color: #166534;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+        .footer-note {
+            margin-top: 35px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 12px;
+            font-size: 11px;
+            color: #94a3b8;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-banner">
+        <div>
+            <h1>Portal de Pacientes</h1>
+            <div class="subtitle">Sistema de Gestión e Integración de Imágenes Médicas (PACS)</div>
+        </div>
+    </div>
+
+    <table class="meta-table">
+        <tr>
+            <td><strong>Organización:</strong> Ministerio de Salud Pública</td>
+            <td><strong>Estado:</strong> Versión Funcional / Producción Local</td>
+        </tr>
+        <tr>
+            <td><strong>Fecha de Informe:</strong> Agosto 2026</td>
+            <td><strong>Arquitectura:</strong> Decoupled Web App (React + .NET 8)</td>
+        </tr>
+    </table>
+
+    <h2>📐 1. Resumen Ejecutivo y Arquitectura</h2>
+    <p>
+        El <strong>Portal de Pacientes</strong> es una plataforma web responsive diseñada para permitir a los ciudadanos acceder de manera ágil, segura y directa a sus estudios médicos de diagnóstico por imágenes (radiografías, tomografías, ecografías, mamografías, etc.) y descargar sus informes médicos oficiales emitidos en los diferentes efectores de la provincia.
+    </p>
+
+    <div class="diagram-box">
++------------------------------------+
+| Dispositivo Móvil / PC del Paciente|
++------------------------------------+
+                 | (HTTP / React Frontend :5173)
+                 v
++------------------------------------+
+| Portal Pacientes Frontend (React)  |
++------------------------------------+
+                 | (REST API :5075)
+                 v
++------------------------------------+
+| Backend .NET Web API               |
++------------------------------------+
+        |                    |
+        | (HTTP REST)        | (Servicio de Integración)
+        v                    v
++------------------+  +-------------------------------+
+| Servidor PACS    |  | Sistema Genexus / SQL Server  |
+| Pentalogic       |  +-------------------------------+
++------------------+
+    </div>
+
+    <h2>🛠️ 2. Tecnologías Utilizadas</h2>
+
+    <h3>Frontend</h3>
+    <ul>
+        <li><strong>Framework / Librería:</strong> React 18 (Vite 8)</li>
+        <li><strong>Enrutamiento:</strong> React Router (v6)</li>
+        <li><strong>Componentes UI e Iconos:</strong> Lucide React, React Hot Toast</li>
+        <li><strong>Seguridad:</strong> React Google reCAPTCHA v2/v3</li>
+        <li><strong>Diseño y Estilos:</strong> CSS3 Orientado a Variables (`:root`, `[data-theme='dark']`), Layout Adaptativo (Flexbox/Grid), animaciones CSS y Modo Oscuro nativo persistente.</li>
+    </ul>
+
+    <h3>Backend</h3>
+    <ul>
+        <li><strong>Plataforma:</strong> .NET 8 (C#) Web API</li>
+        <li><strong>Servidor de Aplicaciones:</strong> Kestrel (`http://localhost:5075`)</li>
+        <li><strong>Comunicación HTTP:</strong> `HttpClient` con soporte asíncrono y tareas en paralelo (`Task.WhenAll`).</li>
+    </ul>
+
+    <h3>Integraciones y Servicios</h3>
+    <ul>
+        <li><strong>PACS Pentalogic:</strong> Consumo de endpoints REST (`getstudylist.php`, `getstudyurl.php`, `getinformeurl.php`).</li>
+        <li><strong>Sistema Genexus (SGC/SGH):** Capa de servicio preparada para mapeo de pacientes y efectores.</li>
+        <li><strong>Seguridad Anti-Bot:</strong> Validación de credenciales e integración de reCAPTCHA.</li>
+    </ul>
+
+    <h2>🚀 3. Entorno de Ejecución</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Componente</th>
+                <th>Directorio Local</th>
+                <th>Comando de Ejecución</th>
+                <th>Puerto / URL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Backend (.NET)</td>
+                <td><code>C:\PROYECTOS\Antigravity\PortalPacientes\PortalPacientes.Backend</code></td>
+                <td><code>dotnet run</code></td>
+                <td><code>http://localhost:5075</code></td>
+            </tr>
+            <tr>
+                <td>Frontend (React)</td>
+                <td><code>C:\PROYECTOS\Antigravity\PortalPacientes\PortalPacientes.Frontend</code></td>
+                <td><code>npm run dev -- --host</code></td>
+                <td><code>http://192.168.149.54:5173</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>✨ 4. Funcionalidades Clave Implementadas</h2>
+    
+    <h3>4.1. Autenticación y Cierre Automático por Inactividad</h3>
+    <ul>
+        <li>Ingreso dinámico mediante <strong>DNI</strong> y <strong>Número de Estudio</strong> (Accession Number).</li>
+        <li>Cierre de sesión automático tras <strong>15 minutos</strong> de inactividad detectando interacción del usuario.</li>
+    </ul>
+
+    <h3>4.2. Tarjetas de Estudio e Historial Unificado</h3>
+    <ul>
+        <li>Visualización del estudio actual e historial completo de los últimos 10 años.</li>
+        <li>Indicadores de Estado: <span class="badge-ready">LISTO</span> (informe disponible) y <span class="badge-pending">PROCESO</span> (estudio en elaboración).</li>
+    </ul>
+
+    <h3>4.3. Filtros y Búsqueda Inteligente</h3>
+    <ul>
+        <li><strong>Filtro de 3 Estados:</strong> Botón toggle entre <code>[Todos]</code>, <code>[Con informe]</code> y <code>[Sin informe]</code>.</li>
+        <li><strong>Búsqueda Multi-Criterio:</strong> Filtra en tiempo real por nombre de estudio, número de acceso, efector/hospital y fecha en múltiples formatos (ISO, DD/MM/YYYY, meses en español).</li>
+    </ul>
+
+    <h3>4.4. Experiencia Móvil y Modo Oscuro</h3>
+    <ul>
+        <li><strong>Visor Móvil PDF:</strong> Abre el PDF directamente en pantalla completa para optimizar en iOS y Android.</li>
+        <li><strong>Modo Oscuro (Dark Mode):</strong> Toggle en el encabezado con paleta de colores ajustada (`#0b1120`, `#1e293b`).</li>
+    </ul>
+
+    <h2>🔗 5. Endpoints de API (.NET Web API)</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Método</th>
+                <th>Endpoint</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>POST</code></td>
+                <td><code>/api/auth/login</code></td>
+                <td>Validación de credenciales y reCAPTCHA con el servidor PACS.</td>
+            </tr>
+            <tr>
+                <td><code>GET</code></td>
+                <td><code>/api/study/current</code></td>
+                <td>Obtiene los detalles y enlaces del estudio actual.</td>
+            </tr>
+            <tr>
+                <td><code>GET</code></td>
+                <td><code>/api/study/history</code></td>
+                <td>Consulta y compila el historial unificado del paciente (10 años).</td>
+            </tr>
+            <tr>
+                <td><code>GET</code></td>
+                <td><code>/api/study/download-report</code></td>
+                <td>Genera la descarga directa del informe médico en formato PDF.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer-note">
+        &copy; 2026 Ministerio de Salud Pública - Portal de Pacientes | Documentación Técnica Oficial
+    </div>
+
+</body>
+</html>

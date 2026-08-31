@@ -243,13 +243,60 @@ export default function Dashboard() {
   
   const filteredHistory = (history || [])
     .filter(study => {
-      const matchSearch = (study.study_desc || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (study.accession_no || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (study.institution_name || study.hospital || study.location || study.institution || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const search = searchTerm.trim().toLowerCase();
       
       let matchStatus = true;
       if (filterStatus === 'READY') matchStatus = !!study.informeUrl;
       if (filterStatus === 'PENDING') matchStatus = !study.informeUrl;
+
+      if (!search) return matchStatus;
+
+      const studyDesc = (study.study_desc || '').toLowerCase();
+      const accessionNo = (study.accession_no || '').toLowerCase();
+      const modality = (study.mods_in_study || '').toLowerCase();
+
+      const hospital = (
+        study.institution_name || 
+        study.hospital || 
+        study.hospitalName || 
+        study.hospital_name || 
+        study.location || 
+        study.institution || 
+        study.efector || 
+        'Ministerio de Salud'
+      ).toLowerCase();
+
+      const rawDate = (study.study_datetime || '').toLowerCase();
+      let slashDate = '';
+      let slashDateShortYear = '';
+      let formattedDateEs = '';
+
+      if (study.study_datetime) {
+        const dateParts = study.study_datetime.split(' ')[0].split('-');
+        if (dateParts.length === 3) {
+          const [year, month, day] = dateParts;
+          slashDate = `${day}/${month}/${year}`;
+          slashDateShortYear = `${day}/${month}/${year.slice(-2)}`;
+          const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          if (!isNaN(dateObj.getTime())) {
+            formattedDateEs = dateObj.toLocaleDateString('es-AR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            }).toLowerCase();
+          }
+        }
+      }
+
+      const matchSearch = 
+        studyDesc.includes(search) ||
+        accessionNo.includes(search) ||
+        modality.includes(search) ||
+        hospital.includes(search) ||
+        rawDate.includes(search) ||
+        slashDate.includes(search) ||
+        slashDateShortYear.includes(search) ||
+        formattedDateEs.includes(search);
 
       return matchSearch && matchStatus;
     })
@@ -393,15 +440,24 @@ export default function Dashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
               <h3 style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.15rem' }}>Historial de Estudios</h3>
               {history && history.length > 0 && (
-                <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
+                <div style={{ position: 'relative', width: '100%', maxWidth: '340px' }}>
                   <Search size={18} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                   <input 
                     type="text" 
-                    placeholder="Buscar por nombre, efector..." 
+                    placeholder="Buscar por estudio, efector, fecha..." 
                     value={searchTerm}
                     onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                    style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', outline: 'none', fontSize: '0.95rem' }}
+                    style={{ width: '100%', padding: '0.5rem 2.2rem 0.5rem 2.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', outline: 'none', fontSize: '0.95rem' }}
                   />
+                  {searchTerm && (
+                    <button 
+                      onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
+                      style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem', display: 'flex', alignItems: 'center' }}
+                      title="Limpiar búsqueda"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
                 </div>
               )}
             </div>

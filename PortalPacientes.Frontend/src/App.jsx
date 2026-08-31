@@ -27,7 +27,7 @@ function App() {
         </main>
 
         <footer className="main-footer">
-          &copy; {new Date().getFullYear()} Ministerio de Salud - Sistema de Gestión de Imágenes (SGC/SGH)
+          &copy; {new Date().getFullYear()} Ministerio de Salud - Portal de Pacientes
         </footer>
       </div>
     </Router>
