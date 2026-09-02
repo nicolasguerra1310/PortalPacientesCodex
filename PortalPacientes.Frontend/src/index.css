@@ -493,12 +493,12 @@ a:hover {
   overflow: hidden;
 }
 
-/* LEFT SIDE: Carousel (75% width) */
+/* LEFT SIDE: Carousel (Oculto en móvil por defecto) */
 .login-carousel {
   display: none;
 }
 
-/* RIGHT SIDE: Login Form (25% width) */
+/* RIGHT SIDE: Login Form (100% en móvil) */
 .login-form {
   width: 100%;
   padding: 2rem 1.5rem;
@@ -507,20 +507,216 @@ a:hover {
   background-color: #0b1120;
   color: white;
   overflow-y: auto;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-form-content {
-  margin: auto 0;
   width: 100%;
-  max-width: 380px;
-  align-self: center;
+  background-color: var(--card-bg);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+.header-logo span {
+  color: var(--primary);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dashboard-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+
+.dashboard-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+  color: var(--primary);
+  line-height: 1.2;
+}
+
+.logout-btn {
+  background-color: transparent !important;
+  color: var(--error) !important;
+  border: 1px solid var(--error) !important;
+  padding: 0.4rem 0.6rem !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: none !important;
+}
+
+.logout-text {
+  display: none;
+}
+
+.glass-panel-responsive {
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .main-header {
+    padding: 1rem 2rem;
+  }
+  .header-logo {
+    font-size: 1.25rem;
+    gap: 0.75rem;
+  }
+  .main-content {
+    padding: 1.5rem 2rem;
+  }
+  .dashboard-header-container {
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .dashboard-title {
+    font-size: 1.75rem;
+  }
+  .logout-btn {
+    padding: 0.5rem 1rem !important;
+  }
+  .logout-text {
+    display: inline;
+  }
+  .glass-panel-responsive {
+    padding: 2rem;
+  }
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+@media (min-width: 640px) {
+  .history-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .history-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.main-footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header-container {
+      gap: 1rem;
+  }
+  .hide-mobile {
+      display: none !important;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton {
+  background: var(--panel-bg);
+  background-image: linear-gradient(to right, var(--panel-bg) 0%, var(--btn-secondary) 20%, var(--panel-bg) 40%, var(--panel-bg) 100%);
+  background-repeat: no-repeat;
+  background-size: 1000px 100%;
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: shimmer;
+  animation-timing-function: linear;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-text { height: 1.25rem; margin-bottom: 0.5rem; width: 80%; }
+.skeleton-title { height: 2rem; width: 60%; margin-bottom: 1rem; }
+.skeleton-card { height: 100px; width: 100%; margin-bottom: 1rem; border-radius: var(--radius-md); }
+
+/* Login Split Layout - Full screen overlay */
+.login-split-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+  z-index: 9999;
+  background: #0b1120;
+  overflow: hidden;
+}
+
+/* LEFT SIDE: Carousel (Oculto en móvil por defecto) */
+.login-carousel {
+  display: none;
+}
+
+/* RIGHT SIDE: Login Form (100% en móvil) */
+.login-form {
+  width: 100%;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #0b1120;
+  color: white;
+  overflow-y: auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-form-content {
+  width: 100%;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
 }
-
+  
 .bottom-logo {
-  height: 80px;
+  height: 90px;
   object-fit: contain;
+  max-width: 100%;
 }
 
 .recaptcha-wrapper {
@@ -534,10 +730,11 @@ a:hover {
   }
 }
 
-@media (min-width: 768px) {
+/* Desktop y Tablets grandes */
+@media (min-width: 992px) {
   .login-carousel {
-    width: 75%;
     display: flex;
+    flex: 1; /* Ocupa el espacio restante */
     flex-direction: column;
     justify-content: space-between;
     position: relative;
@@ -546,11 +743,21 @@ a:hover {
     overflow: hidden;
   }
   .login-form {
-    width: 25%;
-    min-width: 400px;
+    flex: 0 0 450px; /* Ancho fijo para el formulario en desktop */
     padding: 3rem 2.5rem;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5); /* Sombra para separar del carrusel */
+    z-index: 10;
   }
   .bottom-logo {
-    height: 100px;
+    height: 120px;
+  }
+}
+
+.top-header-logo {
+  height: 45px !important;
+}
+@media (min-width: 768px) {
+  .top-header-logo {
+    height: 65px !important;
   }
 }

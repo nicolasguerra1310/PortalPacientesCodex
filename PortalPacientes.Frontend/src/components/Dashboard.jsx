@@ -78,15 +78,17 @@ export default function Dashboard() {
     fetchDashboardData(parsedPatient, accessNumber, false);
   }, [navigate, fetchDashboardData]);
 
-  const handleLogout = useCallback((reason) => {
-    localStorage.removeItem('currentAccessNumber');
-    localStorage.removeItem('token');
-    if (reason === 'inactivity') {
-      toast('Sesión cerrada por inactividad (15 min)', { icon: '🔒', duration: 5000 });
-    } else {
+  const handleLogout = useCallback((type = 'user') => {
+    if (type === 'user') {
+      localStorage.removeItem('patient');
+      localStorage.removeItem('token');
+      localStorage.removeItem('currentAccessNumber');
       toast.success('Sesión cerrada correctamente');
+      navigate('/');
+    } else {
+      localStorage.removeItem('currentAccessNumber');
+      navigate('/');
     }
-    navigate('/login');
   }, [navigate]);
 
   useEffect(() => {

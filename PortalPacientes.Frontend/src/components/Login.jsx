@@ -104,7 +104,7 @@ export default function Login() {
         {/* Carousel Content (Left side text) */}
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
            <div>
-              <img src="/images/logo-ministerio-blanco.png" alt="Ministerio" style={{ height: '130px', objectFit: 'contain' }} />
+              <img src="/images/logo-ministerio-blanco.png" alt="Ministerio" style={{ height: '150px', objectFit: 'contain', maxWidth: '100%' }} />
            </div>
            
            <div style={{ maxWidth: '600px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', marginTop: '-4rem' }}>
