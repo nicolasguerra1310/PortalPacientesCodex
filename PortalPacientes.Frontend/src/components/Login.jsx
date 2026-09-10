@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, ShieldCheck } from 'lucide-react';
+import { FileText, ShieldCheck, Loader2 } from 'lucide-react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import toast from 'react-hot-toast';
 
@@ -172,8 +172,15 @@ export default function Login() {
               </div>
             </div>
 
-            <button type="submit" style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: 'none', backgroundColor: '#0ea5e9', color: 'white', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', transition: 'background-color 0.2s', marginTop: '0.5rem' }} disabled={loading}>
-              {loading ? 'Validando...' : 'Consultar Estudios'}
+            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', borderRadius: '6px', border: 'none', backgroundColor: '#0ea5e9', color: 'white', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', transition: 'background-color 0.2s', marginTop: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 size={20} className="btn-spinner" />
+                  Consultando...
+                </>
+              ) : (
+                'Consultar Estudios'
+              )}
             </button>
           </form>
 
